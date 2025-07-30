@@ -11,7 +11,7 @@ FROM rocm/pytorch:rocm6.4.1_ubuntu24.04_py3.12_pytorch_release_2.7.1 AS base-roc
 
 # To err on the side of caution, I used the devel tag
 # https://stackoverflow.com/questions/56405159/what-is-the-difference-between-devel-and-runtime-tag-for-a-docker-container
-FROM pytorch/pytorch:2.7.1-cuda11.8-cudnn9-devel AS base-cuda
+FROM pytorch/pytorch:2.7.1-cuda12.8-cudnn9-devel AS base-cuda
 # WARNING: I could not test the CUDA version as I have an AMD GPU locally
 
 FROM python:3.12-slim AS base-cpu

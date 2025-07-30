@@ -1,0 +1,97 @@
+# Note: I recommend (and have used): https://www.composerize.com/
+name: amml-python-base
+services:
+  amml-python-base-rocm:
+    build:
+      args:
+        hardware: rocm
+      target: full
+    # See: https://rocm.docs.amd.com/projects/install-on-linux/en/latest/install/3rd-party/pytorch-install.html#using-a-docker-image-with-pytorch-pre-installed
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp=unconfined
+    devices:
+      - /dev/kfd
+      - /dev/dri
+    group_add:
+      - video
+    ipc: host
+    shm_size: 8G
+    image: amml-python-base-rocm:latest
+    stdin_open: true
+    tty: true
+    command: bash
+  amml-python-base-rocm-slim:
+    build:
+      args:
+        hardware: rocm
+      target: slim
+    # See: https://rocm.docs.amd.com/projects/install-on-linux/en/latest/install/3rd-party/pytorch-install.html#using-a-docker-image-with-pytorch-pre-installed
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp=unconfined
+    devices:
+      - /dev/kfd
+      - /dev/dri
+    group_add:
+      - video
+    ipc: host
+    shm_size: 8G
+    image: amml-python-base-rocm-slim:latest
+    stdin_open: true
+    tty: true
+    command: bash
+  amml-python-base-cpu:
+    build:
+      args:
+        hardware: cpu
+      target: full
+    image: amml-python-base-cpu:latest
+    stdin_open: true
+    tty: true
+    command: bash
+  amml-python-base-cpu-slim:
+    build:
+      args:
+        hardware: cpu
+      target: slim
+    image: amml-python-base-cpu-slim:latest
+    stdin_open: true
+    tty: true
+    command: bash
+  amml-python-base-cuda:
+    build:
+      args:
+        hardware: cuda
+      target: full
+    # See: https://docs.nvidia.com/deeplearning/frameworks/pytorch-release-notes/running.html
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities:
+                - gpu
+    stdin_open: true
+    tty: true
+    image: amml-python-base-cuda:latest
+  amml-python-base-cuda-slim:
+    build:
+      args:
+        hardware: cuda
+      target: slim
+    # See: https://docs.nvidia.com/deeplearning/frameworks/pytorch-release-notes/running.html
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities:
+                - gpu
+    stdin_open: true
+    tty: true
+    image: amml-python-base-cuda-slim:latest

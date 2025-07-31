@@ -94,7 +94,7 @@ jobs:
         uses: kfir4444/free-disk-space@main
         with:
           # frees about 6 GB, warning: may remove required tools
-          tool-cache: false
+          tool-cache: true
           android: true
           dotnet: true
           haskell: true

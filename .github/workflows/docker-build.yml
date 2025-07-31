@@ -44,10 +44,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # hardware: ["cpu", "cuda", "rocm"]
-        hardware: ["cpu"]
-        # target: ["slim", "full"]
-        target: ["full"]
+        hardware: ["cpu", "cuda", "rocm"]
+        target: ["slim", "full"]
 
     runs-on: ubuntu-latest
     permissions:

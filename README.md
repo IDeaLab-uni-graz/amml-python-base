@@ -21,6 +21,11 @@ As an example, one can use the following command, which build and runs the _ROCm
 docker-compose run --build --rm amml-python-base-rocm
 ```
 
+### Testing the Github Workflow Locally
+
+I had some success with [`act`](https://nektosact.com/) to simulate GitHub worklow, as typically ran on the GitHub runners, locally. 
+Unfortunately, it seems to get stuck on the push to DockerHub phase for me.
+
 ## Template Guide
 
 ### Structure

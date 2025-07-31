@@ -39,13 +39,15 @@ jobs:
           fi
           echo "All secrets are properly configured"
   build-and-push:
-    timeout-minutes: 10
+    timeout-minutes: 100
 
     strategy:
       fail-fast: false
       matrix:
-        hardware: ["cpu", "cuda", "rocm"]
-        target: ["slim", "full"]
+        # hardware: ["cpu", "cuda", "rocm"]
+        hardware: ["cpu"]
+        # target: ["slim", "full"]
+        target: ["full"]
 
     runs-on: ubuntu-latest
     permissions:
@@ -77,7 +79,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.hardware }}${{ matrix.version == 'slim' && '-slim' }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.hardware }}${{ matrix.version == 'slim' && '-slim' || '' }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -98,7 +100,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}

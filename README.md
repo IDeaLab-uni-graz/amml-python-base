@@ -1,6 +1,27 @@
 # AMML-Python-Base
 
-Run e.g., with
+Docker base images for the needs of the Martin Holler's team at the IDea_Lab, University of Graz.
+
+## Images
+
+We provide several images centered around Python, and more specifically, PyTorch. Regarding the GPU architecture
+CUDA, ROCm and CPU are all supported, but only for the AMD64 CPU architecture!. 
+
+> [!WARNING]
+> As mentioned above, the ARM64 CPU architecture is not currently supported (the CUDA and ROCm builds are failing).
+> However, it is planned in near future.
+
+Lastly, for each hardware version a *full* and a *slim* version, depending on the number of python libraries installed is provided. 
+
+## Running Locally
+
+For ease-of-use, we also include a _docker compose_ file to ease the building and running process. 
+As an example, one can use the following command, which build and runs the _ROCm_ (i.e., AMD GPU) _full_ image.
 ```bash
 docker-compose run --build --rm amml-python-base-rocm
 ```
+
+## Template Guide
+
+### Structure
+

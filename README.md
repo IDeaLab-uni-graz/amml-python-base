@@ -5,11 +5,35 @@ Docker base images for the needs of the Martin Holler's team at the IDea_Lab, Un
 ## Images
 
 We provide several images centered around Python, and more specifically, PyTorch. Regarding the GPU architecture
-CUDA, ROCm and CPU are all supported, but only for the AMD64 CPU architecture!. 
+CUDA and CPU are supported for both AMD64 and ARM64 CPU architectures. 
 
 > [!WARNING]
-> As mentioned above, the ARM64 CPU architecture is not currently supported (the CUDA and ROCm builds are failing).
-> However, it is planned in near future.
+> The ROCm support is **currently unsupported**.
+> 
+> In the `Dockerfile` (and accompanying `docker-compose.yaml`) there is a ROCm version (both in slim- and full variants).
+> It is based on `ubuntu:24.04` and we manually add Python, Pytorch and ROCm, because we tried to decrease the size of the Docker image 
+> (the size of the compressed official image `rocm/pytorch` is around 25 GBs). Unfortunately, it has very little effect on the resulting filesize.
+> 
+> Moreover, the status at the moment is that we override the HSA GFX version 
+> (defaults to 11.0.0, the only one build in the runner) to use a more general, less optimized
+> ROCm HIP drivers. This is done because AMD iGPUs are not officially supported with ROCm (it seems the official Docker image had some issues with this).
+>
+> Lastly, I tried to benchmark pytorch on CPU and using the ROCm acceleration (see `tests/test_cpu_vs_gpu.py`)
+> ```
+> Initialisation of tensors
+> CPU_time =  0.2050325870513916
+> GPU_time =  2.8424596786499023
+> Matrix multiplication
+> CPU_time =  2.375737428665161
+> GPU_time =  0.17871427536010742
+> Broadcasting
+> CPU_time =  0.02744007110595703
+> GPU_time =  0.04163670539855957
+> Outer product of tensors
+> CPU_time =  0.03771543502807617
+> GPU_time =  0.013091325759887695
+> ```
+> In other words, it seems that the ROCm support solely for the AMD iGPUs is not worth it.
 
 Lastly, for each hardware version a *full* and a *slim* version, depending on the number of python libraries installed is provided. 
 

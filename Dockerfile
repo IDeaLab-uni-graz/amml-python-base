@@ -12,7 +12,7 @@ ARG PYTHON_VERSION="3.12"
 ARG ROCM_VERSION="6.3"
 ARG HSA_GFX_VERSION="11"
 
-FROM rocm/dev-ubuntu-24.04:${ROCM_VERSION}-complete  AS base-rocm
+FROM ubuntu:24.04  AS base-rocm
 
 ARG PYTORCH_VERSION
 ARG PYTHON_VERSION
@@ -24,17 +24,18 @@ WORKDIR /opt/build
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-    git software-properties-common curl build-essential \
-    rocm \
-    rocm-hip-libraries \
-    rocm-ml-libraries \
-    rocm-developer-tools \
-    amdgpu-lib \
+    git software-properties-common build-essential \
+    curl gnupg wget \
     && rm -rf /var/lib/apt/lists/*
 
-# Add root to the render and video groups for ROCm to work
-env LOGNAME=root
-RUN usermod -a -G render,video $LOGNAME
+RUN mkdir --parents --mode=0755 /etc/apt/keyrings && \
+    wget https://repo.radeon.com/rocm/rocm.gpg.key -O - | \
+      gpg --dearmor | tee /etc/apt/keyrings/rocm.gpg > /dev/null
+
+RUN echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/rocm/apt/${ROCM_VERSION} jammy main" \
+      | tee /etc/apt/sources.list.d/rocm.list && \
+    printf 'Package: *\nPin: release o=repo.radeon.com\nPin-Priority: 600\n' \
+      | tee /etc/apt/preferences.d/rocm-pin-600
 
 # To allow for installation of a specific Python version
 RUN add-apt-repository ppa:deadsnakes/ppa
@@ -56,6 +57,17 @@ RUN python -m venv /opt/venv
 # Enable venv
 ENV PATH="/opt/venv/bin:$PATH"
 
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    rocm \
+    && rm -rf /var/lib/apt/lists/*
+
+# Add root to the render and video groups for ROCm to work
+ENV LOGNAME=root
+RUN groupadd render && \
+    usermod -a -G render,video $LOGNAME
+
+# See: https://github.com/harakas/amd_igpu_yolo_v8?tab=readme-ov-file
 ENV HSA_ENABLE_SDMA="0"
 ENV HSA_OVERRIDE_GFX_VERSION="${HSA_GFX_VERSION}.0.0"
 
@@ -63,7 +75,6 @@ RUN pip install --upgrade pip \
     && pip install --no-cache-dir  \
       "torch==${PYTORCH_VERSION}"  \
       torchvision  \
-      torchaudio  \
       --index-url https://download.pytorch.org/whl/rocm${ROCM_VERSION}
 
 # To err on the side of caution, I used the devel tag
@@ -83,7 +94,6 @@ RUN pip install --upgrade pip \
     && pip install --no-cache-dir  \
       "torch==${PYTORCH_VERSION}"  \
       torchvision  \
-      torchaudio  \
       --index-url https://download.pytorch.org/whl/cpu
 
 FROM base-${hardware} AS slim

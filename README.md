@@ -4,8 +4,8 @@ Docker base images for the needs of the Martin Holler's team at the IDea_Lab, Un
 
 ## Images
 
-We provide several images centered around Python, and more specifically, PyTorch. Regarding the GPU architecture
-CUDA and CPU are supported for both AMD64 and ARM64 CPU architectures. 
+We provide several images centered around Python, and more specifically, PyTorch. For AMD64, we supply both the CPU and CUDA versions of Pytorch,
+whereas only the CPU version is provided for ARM64.
 
 > [!WARNING]
 > The ROCm support is **currently unsupported**.

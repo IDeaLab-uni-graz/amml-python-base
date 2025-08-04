@@ -114,7 +114,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          platforms: linux/amd64,linux/arm64
+          # Only provide the ARM64 build for the CPU version
+          platforms: linux/amd64${{ (matrix.hardware == 'cpu') && ',linux/arm64' || '' }}
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}

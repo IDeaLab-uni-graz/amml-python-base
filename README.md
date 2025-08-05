@@ -1,6 +1,10 @@
 # AMML-Python-Base
 
-Docker base images for the needs of the Martin Holler's team at the IDea_Lab, University of Graz.
+Docker base images for the needs of the Martin Holler's team at the IDea_Lab, University of Graz. Public builds can be found at
+```
+sceptri/amml-python-base-<hardware>-<slim version?>
+```
+for example `sceptri/amml-python-base-cpu` or `sceptri/amml-python-base-cuda-slim`.
 
 ## Images
 
@@ -8,17 +12,17 @@ We provide several images centered around Python, and more specifically, PyTorch
 whereas only the CPU version is provided for ARM64.
 
 > [!WARNING]
-> The ROCm support is **currently unsupported**.
+> The ROCm version (for GPU acceleration in Pytorch) is **currently unsupported**.
 > 
 > In the `Dockerfile` (and accompanying `docker-compose.yaml`) there is a ROCm version (both in slim- and full variants).
 > It is based on `ubuntu:24.04` and we manually add Python, Pytorch and ROCm, because we tried to decrease the size of the Docker image 
-> (the size of the compressed official image `rocm/pytorch` is around 25 GBs). Unfortunately, it has very little effect on the resulting filesize.
+> (the size of the compressed official image `rocm/pytorch` is around 25 GBs, uncompressed 55 GBs). Unfortunately, it has very little effect on the resulting filesize.
 > 
-> Moreover, the status at the moment is that we override the HSA GFX version 
-> (defaults to 11.0.0, the only one build in the runner) to use a more general, less optimized
-> ROCm HIP drivers. This is done because AMD iGPUs are not officially supported with ROCm (it seems the official Docker image had some issues with this).
+> Moreover, the status at the moment is that we override the HSA GFX version to use a more general, less optimized
+> ROCm HIP drivers. This is done because AMD iGPUs are not officially supported with ROCm 
+> (it seems the official Docker image had some issues with this).
 >
-> Lastly, I tried to benchmark pytorch on CPU and using the ROCm acceleration (see `tests/test_cpu_vs_gpu.py`)
+> Lastly, I (@sceptri on Lenovo Yoga 7 2-in-1 14AKP10) tried to benchmark pytorch on CPU and using the ROCm acceleration (see `tests/test_cpu_vs_gpu.py`)
 > ```
 > Initialisation of tensors
 > CPU_time =  0.2050325870513916
@@ -42,10 +46,10 @@ Lastly, for each hardware version a *full* and a *slim* version, depending on th
 For ease-of-use, we also include a _docker compose_ file to ease the building and running process. 
 As an example, one can use the following command, which build and runs the _ROCm_ (i.e., AMD GPU) _full_ image.
 ```bash
-docker-compose run --build --rm amml-python-base-rocm
+docker-compose run --build --rm amml-python-base-cpu
 ```
 
-### Testing the Github Workflow Locally
+### Testing the GitHub Workflow Locally
 
 I had some success with [`act`](https://nektosact.com/) to simulate GitHub worklow, as typically ran on the GitHub runners, locally. 
 Unfortunately, it seems to get stuck on the push to DockerHub phase for me.
@@ -59,4 +63,6 @@ act --secret-file .secrets
 ## Template Guide
 
 ### Structure
+
+_To be added soon._
 

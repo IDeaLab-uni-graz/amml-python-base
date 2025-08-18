@@ -39,7 +39,7 @@ jobs:
           fi
           echo "All secrets are properly configured"
   build-and-push:
-    timeout-minutes: 100
+    timeout-minutes: 200
 
     strategy:
       fail-fast: false

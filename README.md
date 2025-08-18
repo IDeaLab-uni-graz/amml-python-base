@@ -51,7 +51,7 @@ docker-compose run --build --rm amml-python-base-cpu
 
 ### Testing the GitHub Workflow Locally
 
-I had some success with [`act`](https://nektosact.com/) to simulate GitHub worklow, as typically ran on the GitHub runners, locally. 
+I had some success with [`act`](https://nektosact.com/) to simulate GitHub workflow, as typically ran on the GitHub runners, locally. 
 Unfortunately, it seems to get stuck on the push to DockerHub phase for me.
 
 For `act` to work, one needs to create a secrets file, e.g., `.secrets`, with `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN` and **`GITHUB_TOKEN`** 

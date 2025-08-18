@@ -120,6 +120,8 @@ COPY --chown=root:root requirements.txt .
 RUN pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
+RUN git config --system --add safe.directory /opt/project   # writes /etc/gitconfig
+
 # ENTRYPOINT ["python"]
 ENTRYPOINT [ "/bin/bash", "-l", "-c" ]
 

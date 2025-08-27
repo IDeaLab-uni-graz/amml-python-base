@@ -1,78 +1,57 @@
-# Some notes:
+# AMML Python Base
 
-- We agreed to remove (or move to another branch) everything for the ROCM support to keep things as simple as possble. Todo: Stepan please do this.
-- In general, we should discuss a baseline working framework and add all necessary packages in the full requirements file.
-- Add note: pytorch is always installed, directly via the docker container
-
-Todo:
-- Quickstart section with minimilistic workflow, such as:
-1) List and (with one sentence) describe availabl images
-2) Provide basic command to use a specific image in any given project, e.g.; 
-
-```bash
-docker run -it sceptri/amml-python-base-cpu:latest bash
-```
-
-- Extended readme section with further information, including a comment on the test folder (even tough the tests will be removed with removal of rocm support)
-- Ask Shaba about a possible docker-hub from the idealab and, if possible, move the images there. If not, we can use them to Martins account.
-
-
-# AMML-Python-Base
-
-Docker base images for the needs of the Martin Holler's team at the IDea_Lab, University of Graz. Public builds can be found at
+Docker base images for the needs of the Martin Holler's team (AMML) at the IDea_Lab, University of Graz. Public builds can be found on DockerHub under the name
 
 ```
 sceptri/amml-python-base-<hardware>-<slim version?>
 ```
-
 for example `sceptri/amml-python-base-cpu` or `sceptri/amml-python-base-cuda-slim`.
+
+## Recommended Usage
+
+Below are documented main use-cases and their respective recommended workflows:
+
+- "One needs to try out something very simple in Python without the need for version control, but they want to use a controlled reproducible environment." - Use the DockerHub built version of the images from this repo directly via `docker run`, e.g.,
+  ```shell
+  docker run -it sceptri/amml-python-base-cpu-slim:latest bash
+  ```
+- "One works on a (simple) Python project which is not based around machine learning or requires a very specific structure of the project." - Use the simple [AMML Python template](https://github.com/IDeaLab-uni-graz/amml-python-template), which provides `docker-compose.yaml` to ease with the running/building of the project-specific Docker image, e.g.[^1],
+  ```shell
+  docker-compose run --build --rm amml-project-cpu
+  ```
+- "One works on a (standard) machine learning Python project utilizing the common workflows and apps, e.g., MLFlow, of the AMML team." - Use the advanced [AMML Python ML template](https://github.com/IDeaLab-uni-graz/amml-python-ml-template), which provides all the bells and whistles one might need throughout the project development along with a basic structure and example usage. With Docker compose, one can just run, e.g.[^1],
+  ```shell
+  docker-compose run --build --rm amml-project-cuda-slim
+  ```
+  
+[^1]: Change the `amml-project-cpu` for the corresponding project name, see `docker-compose.yaml` in the project directory.
 
 ## Images
 
-We provide several images centered around Python, and more specifically, PyTorch. For AMD64, we supply both the CPU and CUDA versions of Pytorch,
-whereas only the CPU version is provided for ARM64.
+We provide several images centered around Python, and more specifically, PyTorch. For AMD64 architecture we supply both the CPU and CUDA versions of Pytorch, whereas only the CPU version is provided for ARM64 architecture.
 
-> [!WARNING]
-> The ROCm version (for GPU acceleration in Pytorch) is **currently unsupported**.
-> 
-> In the `Dockerfile` (and accompanying `docker-compose.yaml`) there is a ROCm version (both in slim- and full variants).
-> It is based on `ubuntu:24.04` and we manually add Python, Pytorch and ROCm, because we tried to decrease the size of the Docker image 
-> (the size of the compressed official image `rocm/pytorch` is around 25 GBs, uncompressed 55 GBs). Unfortunately, it has very little effect on the resulting filesize.
-> 
-> Moreover, the status at the moment is that we override the HSA GFX version to use a more general, less optimized
-> ROCm HIP drivers. This is done because AMD iGPUs are not officially supported with ROCm 
-> (it seems the official Docker image had some issues with this).
-> 
-> Lastly, I (@sceptri on Lenovo Yoga 7 2-in-1 14AKP10) tried to benchmark pytorch on CPU and using the ROCm acceleration (see `tests/test_cpu_vs_gpu.py`)
-> 
-> ```
-> Initialisation of tensors
-> CPU_time =  0.2050325870513916
-> GPU_time =  2.8424596786499023
-> Matrix multiplication
-> CPU_time =  2.375737428665161
-> GPU_time =  0.17871427536010742
-> Broadcasting
-> CPU_time =  0.02744007110595703
-> GPU_time =  0.04163670539855957
-> Outer product of tensors
-> CPU_time =  0.03771543502807617
-> GPU_time =  0.013091325759887695
-> ```
-> 
-> In other words, it seems that the ROCm support solely for the AMD iGPUs is not worth it.
+> Let us note that ROCm support was deprecated, and is currently archived in the `rocm-support` branch.
 
-Lastly, for each hardware version a *full* and a *slim* version, depending on the number of python libraries installed is provided. 
+For each hardware version a *full* and a *slim* variants, depending on the number of python libraries installed, are defined. The *slim* version is intended only for small experiments and/or Python environments unrelated to machine learning. 
 
-## Running Locally
+> Note that PyTorch is installed separately outside of `requirements.txt` to follow the official installation instructions more closely. See the `Dockerfile` for more details.
 
-For ease-of-use, we also include a _docker compose_ file to ease the building and running process. 
-As an example, one can use the following command, which build and runs the _ROCm_ (i.e., AMD GPU) _full_ image.
+If you have any suggestion what to include/exclude from the Python module requirements in the *full*/*slim* versions, please open a Pull Request or an Issue.
 
-```bash
+**Provided Images:**
+- [`sceptri/amml-python-base-cpu`](https://hub.docker.com/r/sceptri/amml-python-base-cpu) - default image to use for local development
+- [`sceptri/amml-python-base-cuda`](https://hub.docker.com/r/sceptri/amml-python-base-cuda) - default image for servers and/or workstations with NVIDIA GPUs
+- [`sceptri/amml-python-base-cpu-slim`](https://hub.docker.com/r/sceptri/amml-python-base-cpu-slim) - lightweight version of the CPU image for local development, in general use only if appropriate for projects not following the AMML standards/best practices
+- [`sceptri/amml-python-base-cuda-slim`](https://hub.docker.com/r/sceptri/amml-python-base-cuda-slim) - lightweight version of the NVIDIA GPU image, in general use only if appropriate for projects not following the AMML standards/best practices
+
+## Development
+### Building and Running Locally
+
+For ease-of-use, we also include a _docker compose_ file to ease the building and running process. As an example, one can use the following command, which build and runs the _CPU full_ image.
+
+```shell
 docker-compose run --build --rm amml-python-base-cpu
 ```
-
 ### Testing the GitHub Workflow Locally
 
 I had some success with [`act`](https://nektosact.com/) to simulate GitHub workflow, as typically ran on the GitHub runners, locally. 
@@ -81,12 +60,12 @@ Unfortunately, it seems to get stuck on the push to DockerHub phase for me.
 For `act` to work, one needs to create a secrets file, e.g., `.secrets`, with `DOCKERHUB_USERNAME`, `DOCKERHUB_TOKEN` and **`GITHUB_TOKEN`** 
 (personal access token for GitHub, which is usually supplied to the runner automatically). Then, one can use
 
-```bash
+```shell
 act --secret-file .secrets
 ```
 
-## Template Guide
+### Tests
 
-### Structure
+Currently, during the CI/CD pipeline the images are only built and deployed to DockerHub. In future, it might be appropriate run certain tests, which should then live in the `tests` folder.
 
-_To be added soon._
+Note that `tests` directory is also the place to store scripts for manual testing (e.g., benchmarking, checking GPU acceleration support in PyTorch).

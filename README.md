@@ -1,21 +1,5 @@
-# Some notes:
-
-- We agreed to remove (or move to another branch) everything for the ROCM support to keep things as simple as possble. Todo: Stepan please do this.
-- In general, we should discuss a baseline working framework and add all necessary packages in the full requirements file.
-- Add note: pytorch is always installed, directly via the docker container
-
-Todo:
-- Quickstart section with minimilistic workflow, such as:
-1) List and (with one sentence) describe availabl images
-2) Provide basic command to use a specific image in any given project, e.g.; 
-
-```bash
-docker run -it sceptri/amml-python-base-cpu:latest bash
-```
-
-- Extended readme section with further information, including a comment on the test folder (even tough the tests will be removed with removal of rocm support)
-- Ask Shaba about a possible docker-hub from the idealab and, if possible, move the images there. If not, we can use them to Martins account.
-
+> [!WARNING]
+> This is a deprecated branch containing ROCm support. For an up-to-date version, please refer to the `main` branch.
 
 # AMML-Python-Base
 

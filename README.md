@@ -44,6 +44,14 @@ If you have any suggestion what to include/exclude from the Python module requir
 - [`sceptri/amml-python-base-cpu-slim`](https://hub.docker.com/r/sceptri/amml-python-base-cpu-slim) - lightweight version of the CPU image for local development, in general use only if appropriate for projects not following the AMML standards/best practices
 - [`sceptri/amml-python-base-cuda-slim`](https://hub.docker.com/r/sceptri/amml-python-base-cuda-slim) - lightweight version of the NVIDIA GPU image, in general use only if appropriate for projects not following the AMML standards/best practices
 
+
+> [!TIP]
+> If you need a newer version of one of the base images, you might need to "force pull" the image from DockerHub to replace the locally cached version
+> ```shell
+> docker pull sceptri/amml-python-base-cpu:latest
+> ```
+> This also applies when using one of the templates (where the image is import via the `Dockerfile` keyword `FROM`)!
+
 ## Development
 ### Building and Running Locally
 

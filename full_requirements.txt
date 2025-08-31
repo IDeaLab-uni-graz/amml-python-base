@@ -1,4 +1,4 @@
--r slim_requirements.txt
+-r /opt/build/slim_requirements.txt
 ipython==9.4.0
 jupyterlab==4.4.5
 pillow==11.3.0

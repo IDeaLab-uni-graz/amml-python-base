@@ -9,13 +9,14 @@ on:
       - 'slim_requirements.txt'
       - 'full_requirements.txt'
       - '.github/workflows/docker-build.yml'
-  pull_request:
-    branches:
-      - main
-    paths:
-      - 'Dockerfile'
-      - 'full_requirements.txt'
-      - 'slim_requirements.txt'
+  # Note: To save workflow time, let us NOT run the image build on PRs (mainly due to dependabot)
+  # pull_request:
+  #  branches:
+  #    - main
+  #  paths:
+  #    - 'Dockerfile'
+  #    - 'full_requirements.txt'
+  #    - 'slim_requirements.txt'
 
 env:
   REGISTRY: docker.io

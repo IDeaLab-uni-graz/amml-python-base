@@ -7,7 +7,7 @@ updates:
   directory: "/" # Location of package manifests
   schedule:
     interval: "weekly"
-  open-pull-requests-limit: 5
+  open-pull-requests-limit: 10
   allow:
     # Allow both direct and indirect updates for all packages
       - dependency-type: "all"

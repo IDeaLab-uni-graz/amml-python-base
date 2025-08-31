@@ -10,7 +10,7 @@ ARG hardware="cpu"
 ARG PYTORCH_VERSION="2.8.0"
 ARG PYTHON_VERSION="3.12"
 
-# Note that we are not specifying PyTorch in requirements.txt to follow the official installation instructions as closely as possible.
+# Note that we are not specifying PyTorch in base_requirements.txt to follow the official installation instructions as closely as possible.
 
 # To err on the side of caution, I used the devel tag
 # https://stackoverflow.com/questions/56405159/what-is-the-difference-between-devel-and-runtime-tag-for-a-docker-container
@@ -51,9 +51,9 @@ RUN apt-get update && \
 
 WORKDIR /opt/build
 
-COPY --chown=root:root requirements.txt .
+COPY --chown=root:root slim_requirements.txt .
 RUN pip install --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+    && pip install --no-cache-dir -r slim_requirements.txt
 
 RUN git config --system --add safe.directory /opt/project   # writes /etc/gitconfig
 

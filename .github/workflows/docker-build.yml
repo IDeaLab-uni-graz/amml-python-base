@@ -6,7 +6,7 @@ on:
       # Remove the branches filter entirely
     paths:
       - 'Dockerfile'
-      - 'requirements.txt'
+      - 'slim_requirements.txt'
       - 'full_requirements.txt'
       - '.github/workflows/docker-build.yml'
   pull_request:
@@ -15,7 +15,7 @@ on:
     paths:
       - 'Dockerfile'
       - 'full_requirements.txt'
-      - 'requirements.txt'
+      - 'slim_requirements.txt'
 
 env:
   REGISTRY: docker.io

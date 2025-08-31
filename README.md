@@ -42,7 +42,7 @@ We provide several images centered around Python, and more specifically, PyTorch
 
 For each hardware version a *full* and a *slim* variants, depending on the number of python libraries installed, are defined. The *slim* version is intended only for small experiments and/or Python environments unrelated to machine learning. 
 
-> Note that PyTorch is installed separately outside of `requirements.txt` to follow the official installation instructions more closely. See the `Dockerfile` for more details.
+> Note that PyTorch is installed separately outside of `slim_requirements.txt` to follow the official installation instructions more closely. See the `Dockerfile` for more details.
 
 If you have any suggestion what to include/exclude from the Python module requirements in the *full*/*slim* versions, please open a Pull Request or an Issue.
 
@@ -86,6 +86,6 @@ act --secret-file .secrets
 
 ### Tests
 
-Currently, during the CI/CD pipeline the images are only built and deployed to DockerHub. In future, it might be appropriate run certain tests, which should then live in the `tests` folder.
+Currently, during the CI/CD pipeline the images are only built and deployed to DockerHub. In the future, it might be appropriate run certain tests, which should then live in the `tests` folder.
 
 Note that `tests` directory is also the place to store scripts for manual testing (e.g., benchmarking, checking GPU acceleration support in PyTorch).

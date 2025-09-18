@@ -3,7 +3,7 @@ name: Build and Push Docker Image
 on:
   push:
     branches:
-      # Remove the branches filter entirely
+      - 'main'
     paths:
       - 'Dockerfile'
       - 'slim_requirements.txt'

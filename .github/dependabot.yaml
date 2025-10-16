@@ -8,6 +8,7 @@ updates:
   schedule:
     interval: "weekly"
   open-pull-requests-limit: 10
+  insecure-external-code-execution: allow
   allow:
     # Allow both direct and indirect updates for all packages
       - dependency-type: "all"

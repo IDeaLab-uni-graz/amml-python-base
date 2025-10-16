@@ -1,6 +1,7 @@
 name: Check new version of amml-utils
 
 on:
+  workflow_dispatch:
   schedule:
     # Run this job every 4 hours
     - cron: "0 0/4 * * *"

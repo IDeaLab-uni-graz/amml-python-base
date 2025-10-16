@@ -54,7 +54,7 @@ jobs:
           GH_REPO: ${{ github.repository }}
           TITLE: "[CI] New version ${{ needs.fetch-tags.outputs.new }} of amml-utils available!"
           ASSIGNEES: sceptri
-          LABELS: dependency
+          LABELS: dependencies
           BODY: |
             ### New `amml-utils` version
 

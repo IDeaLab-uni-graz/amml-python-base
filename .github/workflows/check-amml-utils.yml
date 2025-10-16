@@ -1,7 +1,6 @@
 name: Check new version of amml-utils
 
 on:
-  workflow_dispatch:
   schedule:
     # Run this job every 4 hours
     - cron: "0 0/4 * * *"
@@ -13,31 +12,51 @@ permissions:
 jobs:
   fetch-tags:
     runs-on: ubuntu-latest
+    outputs:
+      comparison: ${{ steps.compare-versions.outputs.comparison-result }}
+      new: ${{ steps.get-latest-version.outputs.tag }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
       - id: get-latest-version
+        name: Get the latest version
         uses: oprypin/find-latest-tag@v1
         with:
           repository: IDeaLab-uni-graz/amml-utils  # The repository to scan.
       - id: get-current-version
+        name: Get the currently used version
         run: |
           VER=`grep -oE 'amml-utils.git@[0-9]+.[0-9]+.[0-9]+' slim_requirements.txt | awk -F"@" '{print (NF>1)? $NF : ""}'`
           echo "tag=$VER" >> $GITHUB_OUTPUT
       - uses: madhead/semver-utils@latest
+        name: Compare versions
         id: compare-versions
         with:
-          # A version to work with
           version: ${{ steps.get-current-version.outputs.tag }}
-          # A version to compare against
-          compare-to: ${{ steps.get-latest.version.outputs.tag }}
-  open-pr:
+          compare-to: ${{ steps.get-latest-version.outputs.tag }}
+  open-issue:
     runs-on: ubuntu-latest
     needs: fetch-tags
+    if: ${{ needs.fetch-tags.outputs.comparison == '<' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - uses: JasonEtco/create-an-issue@v2
+      - name: Create issue
+        run: |
+          new_issue_url=$(gh issue create \
+            --title "$TITLE" \
+            --assignee "$ASSIGNEES" \
+            --label "$LABELS" \
+            --body "$BODY")
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        if: ${{ needs.fetch-tags.steps.compare-versions.outputs.comparison-results == '<' }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          TITLE: "[CI] New version ${{ needs.fetch-tags.outputs.new }} of amml-utils available!"
+          ASSIGNEES: sceptri
+          LABELS: dependency
+          BODY: |
+            ### New `amml-utils` version
+
+            Attention! New version of `amml-utils`, namely ${{ needs.fetch-tags.outputs.new }}, was found! We should update!
+
+            > Note: This issue was generated automatically. Please report any issues to @sceptri.

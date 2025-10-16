@@ -12,6 +12,7 @@ in
   pkgs.mkShell {
     buildInputs = [
       pkgs.act
+	  pkgs.gh
     ];
 
     shellHook = ''

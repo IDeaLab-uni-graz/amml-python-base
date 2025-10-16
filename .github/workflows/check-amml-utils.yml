@@ -1,0 +1,42 @@
+name: Check new version of amml-utils
+
+on:
+  schedule:
+    # Run this job every 4 hours
+    - cron: "0 0/4 * * *"
+
+permissions:
+  contents: read
+  issues: write 
+
+jobs:
+  fetch-tags:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - id: get-latest-version
+        uses: oprypin/find-latest-tag@v1
+        with:
+          repository: IDeaLab-uni-graz/amml-utils  # The repository to scan.
+      - id: get-current-version
+        run: |
+          VER=`grep -oE 'amml-utils.git@[0-9]+.[0-9]+.[0-9]+' slim_requirements.txt | awk -F"@" '{print (NF>1)? $NF : ""}'`
+          echo "tag=$VER" >> $GITHUB_OUTPUT
+      - uses: madhead/semver-utils@latest
+        id: compare-versions
+        with:
+          # A version to work with
+          version: ${{ steps.get-current-version.outputs.tag }}
+          # A version to compare against
+          compare-to: ${{ steps.get-latest.version.outputs.tag }}
+  open-pr:
+    runs-on: ubuntu-latest
+    needs: fetch-tags
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - uses: JasonEtco/create-an-issue@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: ${{ needs.fetch-tags.steps.compare-versions.outputs.comparison-results == '<' }}

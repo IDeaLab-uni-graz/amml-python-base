@@ -1,0 +1,70 @@
+name: Check new version of PyTorch
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Run this job every 4 hours
+    - cron: "0 0/4 * * *"
+
+permissions:
+  contents: read
+  issues: write 
+
+jobs:
+  fetch-tags:
+    runs-on: ubuntu-latest
+    outputs:
+      comparison: ${{ steps.compare-versions.outputs.comparison-result }}
+      new: ${{ steps.get-latest-version.outputs.latestVersion }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - id: get-python
+        name: Get the currently Python used version
+        run: |
+          VER=`grep -oE 'PYTHON_VERSION="[0-9]+.[0-9]+.[0-9]+' Dockerfile | awk -F"=\"" '{print (NF>1)? $NF : ""}'`
+          echo "ver=$VER" >> $GITHUB_OUTPUT
+      - uses: Bruce17/ghaction-package-latest-version@v1
+        id: get-latest-version
+        with:
+          package: torch
+          language: python
+          conditions: |
+            pythonVersion: ${{ steps.get-python.outputs.ver }}
+      - id: get-current-version
+        name: Get the currently used version
+        run: |
+          VER=`grep -oE 'PYTORCH_VERSION="[0-9]+.[0-9]+.[0-9]+' Dockerfile | awk -F"=\"" '{print (NF>1)? $NF : ""}'`
+          echo "tag=$VER" >> $GITHUB_OUTPUT
+      - uses: madhead/semver-utils@latest
+        name: Compare versions
+        id: compare-versions
+        with:
+          version: ${{ steps.get-current-version.outputs.tag }}
+          compare-to: ${{ steps.get-latest-version.outputs.latestVersion }}
+  open-issue:
+    runs-on: ubuntu-latest
+    needs: fetch-tags
+    if: ${{ needs.fetch-tags.outputs.comparison == '<' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Create issue
+        run: |
+          new_issue_url=$(gh issue create \
+            --title "$TITLE" \
+            --assignee "$ASSIGNEES" \
+            --label "$LABELS" \
+            --body "$BODY")
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          TITLE: "[CI] New version ${{ needs.fetch-tags.outputs.new }} of PyTorch available!"
+          ASSIGNEES: sceptri
+          LABELS: dependencies
+          BODY: |
+            ### New PyTorch version
+
+            Attention! New version of `torch`, namely ${{ needs.fetch-tags.outputs.new }}, was found! We should update!
+
+            > Note: This issue was generated automatically. Please report any issues to @sceptri.

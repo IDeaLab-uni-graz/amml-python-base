@@ -7,7 +7,7 @@ ARG hardware="cpu"
 # - pytorch 2.9.0
 # - apt-based userland for the docker image
 
-ARG PYTORCH_VERSION="2.9.0"
+ARG PYTORCH_VERSION="2.9.1"
 ARG PYTHON_VERSION="3.12"
 
 # Note that we are not specifying PyTorch in base_requirements.txt to follow the official installation instructions as closely as possible.

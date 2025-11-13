@@ -35,10 +35,28 @@ jobs:
         with:
           version: ${{ steps.get-current-version.outputs.tag }}
           compare-to: ${{ steps.get-latest-version.outputs.tag }}
-  open-issue:
+  check-already-open:
     runs-on: ubuntu-latest
     needs: fetch-tags
     if: ${{ needs.fetch-tags.outputs.comparison == '<' }}
+    outputs:
+      issue-list: ${{ steps.check-issue.outputs.issues }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Check issue exists
+        id: check-issue
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'find-issues'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title-includes: "[CI] New version ${{ needs.fetch-tags.outputs.new }} of amml-utils available!"
+  open-issue:
+    runs-on: ubuntu-latest
+    needs:
+      - fetch-tags
+      - check-already-open
+    if: ${{ needs.fetch-tags.outputs.comparison == '<' && needs.check-already-open.outputs.issue-list == '[]' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

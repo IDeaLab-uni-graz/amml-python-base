@@ -57,12 +57,15 @@ RUN pip install --upgrade pip \
 
 RUN git config --system --add safe.directory /opt/project   # writes /etc/gitconfig
 
-# ENTRYPOINT ["python"]
-ENTRYPOINT [ "/bin/bash", "-l", "-c" ]
+# Entrypoint improves QoL when passing mulitple commands etc.
+COPY --chown=root:root entrypoint.sh .
+ENTRYPOINT ["./entrypoint.sh"]
 
 FROM slim AS full
 
 COPY --chown=root:root full_requirements.txt .
 RUN pip install --no-cache-dir -r full_requirements.txt
 
-ENTRYPOINT [ "/bin/bash", "-l", "-c" ]
+# Entrypoint improves QoL when passing mulitple commands etc.
+COPY --chown=root:root entrypoint.sh .
+ENTRYPOINT ["./entrypoint.sh"]

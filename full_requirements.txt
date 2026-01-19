@@ -6,7 +6,7 @@ pillow==12.1.0
 pytorch-lightning==2.6.0
 optuna==4.6.0
 pytest==9.0.2
-nc_py_api==0.23.0
+nc_py_api==0.23.1
 mlflow==3.8.1
 python-box[all]==7.3.2
 #Should we keep the following packages:

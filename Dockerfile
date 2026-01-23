@@ -15,7 +15,9 @@ ARG PYTHON_VERSION="3.12"
 # To err on the side of caution, I used the devel tag
 # https://stackoverflow.com/questions/56405159/what-is-the-difference-between-devel-and-runtime-tag-for-a-docker-container
 FROM pytorch/pytorch:${PYTORCH_VERSION}-cuda12.8-cudnn9-devel AS base-cuda
-# WARNING: I could not test the CUDA version as I have an AMD GPU locally
+
+# WARNING: Remove PEP 668 restriction (should be safe in containers)
+RUN rm -f /usr/lib/python*/EXTERNALLY-MANAGED
 
 FROM python:${PYTHON_VERSION}-slim AS base-cpu
 

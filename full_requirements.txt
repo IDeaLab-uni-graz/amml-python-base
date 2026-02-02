@@ -3,7 +3,7 @@
 ipython==9.9.0
 jupyterlab==4.5.3
 pillow==12.1.0
-pytorch-lightning==2.6.0
+pytorch-lightning==2.6.1
 optuna==4.7.0
 pytest==9.0.2
 nc_py_api==0.23.1

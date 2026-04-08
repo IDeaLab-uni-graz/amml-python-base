@@ -7,7 +7,7 @@ pytorch-lightning==2.6.1
 optuna==4.8.0
 pytest==9.0.2
 nc_py_api==0.30.0
-mlflow==3.10.1
+mlflow==3.11.0rc1
 python-box[all]==7.4.1
 #Should we keep the following packages:
 tabulate==0.10.0

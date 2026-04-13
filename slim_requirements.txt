@@ -1,5 +1,5 @@
 numpy==2.4.4
 scipy==1.17.1
-pandas==2.3.3
+pandas==3.0.2
 matplotlib==3.10.8
 amml-utils @ git+https://github.com/IDeaLab-uni-graz/amml-utils.git@1.2.13

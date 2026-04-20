@@ -11,4 +11,4 @@ mlflow==3.11.1
 python-box[all]==7.4.1
 #Should we keep the following packages:
 tabulate==0.10.0
-ray==2.54.1
+ray==2.55.0

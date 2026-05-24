@@ -1,20 +1,20 @@
 # Flag upon which it is decided to use either the CPU or the CUDA version
-# Allowed values: cuda, cpu, rocm
+# Allowed values: cuda, cpu
 ARG hardware="cpu"
 
 # In general, we are using:
-# - python 3.12
-# - pytorch 2.10.0
+# - python, pytorch and CUDA version specified below
 # - apt-based userland for the docker image
 
 ARG PYTORCH_VERSION="2.12.0"
 ARG PYTHON_VERSION="3.12"
+ARG CUDA_VERSION="13.2"
 
 # Note that we are not specifying PyTorch in base_requirements.txt to follow the official installation instructions as closely as possible.
 
 # To err on the side of caution, I used the devel tag
 # https://stackoverflow.com/questions/56405159/what-is-the-difference-between-devel-and-runtime-tag-for-a-docker-container
-FROM pytorch/pytorch:${PYTORCH_VERSION}-cuda12.8-cudnn9-devel AS base-cuda
+FROM pytorch/pytorch:${PYTORCH_VERSION}-cuda${CUDA_VERSION}}-cudnn9-devel AS base-cuda
 
 # WARNING: Remove PEP 668 restriction (should be safe in containers)
 RUN rm -f /usr/lib/python*/EXTERNALLY-MANAGED
@@ -23,6 +23,7 @@ FROM python:${PYTHON_VERSION}-slim AS base-cpu
 
 ARG PYTORCH_VERSION
 ARG PYTHON_VERSION
+ARG CUDA_VERSION
 
 USER root
 WORKDIR /opt/build
@@ -38,7 +39,7 @@ LABEL authors="sceptri"
 
 ARG PYTORCH_VERSION
 ARG PYTHON_VERSION
-ARG ROCM_VERSION
+ARG CUDA_VERSION
 
 USER root
 RUN apt-get update && \

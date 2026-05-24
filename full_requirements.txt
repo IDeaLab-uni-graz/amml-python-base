@@ -1,14 +1,14 @@
 # INFO: Dependabot requires relative paths
 -r slim_requirements.txt
-ipython==9.12.0
+ipython==9.13.0
 jupyterlab==4.5.7
 pillow==12.2.0
 pytorch-lightning==2.6.1
 optuna==4.8.0
 pytest==9.0.3
-nc_py_api==0.30.0
+nc_py_api==0.30.1
 mlflow==3.12.0
 python-box[all]==7.4.1
 #Should we keep the following packages:
 tabulate==0.10.0
-ray==2.54.1
+ray==2.55.1

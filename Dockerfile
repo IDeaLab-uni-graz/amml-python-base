@@ -14,7 +14,7 @@ ARG CUDA_VERSION="13.2"
 
 # To err on the side of caution, I used the devel tag
 # https://stackoverflow.com/questions/56405159/what-is-the-difference-between-devel-and-runtime-tag-for-a-docker-container
-FROM pytorch/pytorch:${PYTORCH_VERSION}-cuda${CUDA_VERSION}}-cudnn9-devel AS base-cuda
+FROM pytorch/pytorch:${PYTORCH_VERSION}-cuda${CUDA_VERSION}-cudnn9-devel AS base-cuda
 
 # WARNING: Remove PEP 668 restriction (should be safe in containers)
 RUN rm -f /usr/lib/python*/EXTERNALLY-MANAGED

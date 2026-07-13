@@ -5,7 +5,7 @@ jupyterlab==4.6.1
 pillow==12.2.0
 pytorch-lightning==2.6.5
 optuna==4.9.0
-pytest==9.1.0
+pytest==9.1.1
 nc_py_api==0.30.2
 mlflow==3.14.0
 python-box[all]==7.4.1

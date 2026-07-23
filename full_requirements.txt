@@ -2,7 +2,7 @@
 -r slim_requirements.txt
 ipython==9.15.0
 jupyterlab==4.6.1
-pillow==12.2.0
+pillow==12.3.0
 pytorch-lightning==2.6.5
 optuna==4.9.0
 pytest==9.1.0

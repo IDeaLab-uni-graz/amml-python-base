@@ -6,7 +6,7 @@ ARG hardware="cpu"
 # - python, pytorch and CUDA version specified below
 # - apt-based userland for the docker image
 
-ARG PYTORCH_VERSION="2.12.1"
+ARG PYTORCH_VERSION="2.13.0"
 ARG PYTHON_VERSION="3.12"
 ARG CUDA_VERSION="13.2"
 

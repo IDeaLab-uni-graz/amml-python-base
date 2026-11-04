@@ -85,5 +85,7 @@ jobs:
             ### New PyTorch version
 
             Attention! New version of `torch`, namely ${{ needs.fetch-tags.outputs.new }}, was found! We should update!
+            
+            Do not forget to also update `torch` in [`amml-utils`](https://github.com/IDeaLab-uni-graz/amml-utils/).
 
             > Note: This issue was generated automatically. Please report any issues to @sceptri.

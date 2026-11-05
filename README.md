@@ -3,10 +3,10 @@
 Docker base images for the needs of the Martin Holler's team (AMML) at the IDea_Lab, University of Graz. Public builds can be found on DockerHub under the name
 
 ```
-sceptri/amml-python-base-<hardware>-<slim version?>
+devidealab/amml-python-base-<hardware>-<slim version?>
 ```
 
-for example `sceptri/amml-python-base-cpu` or `sceptri/amml-python-base-cuda-slim`.
+for example `devidealab/amml-python-base-cpu` or `devidealab/amml-python-base-cuda-slim`.
 
 ## Recommended Usage
 
@@ -15,7 +15,7 @@ Below are documented main use-cases and their respective recommended workflows:
 - "One needs to try out something very simple in Python without the need for version control or installing additional packages, but they want to use a controlled reproducible environment." - Use the DockerHub built version of the images from this repo directly via `docker run`, e.g.,
   
   ```shell
-  docker run -it -v $(pwd):/opt/build/src sceptri/amml-python-base-cpu-slim:latest bash
+  docker run -it -v $(pwd):/opt/build/src devidealab/amml-python-base-cpu-slim:latest bash
   ```
   
   Here, the `-v $(pwd):/opt/build/src` is optional and mounts your current working directory into `/src` of the base directory.
@@ -48,16 +48,16 @@ If you have any suggestion what to include/exclude from the Python module requir
 
 **Provided Images:**
 
-- [`sceptri/amml-python-base-cpu`](https://hub.docker.com/r/sceptri/amml-python-base-cpu) - default image to use for local development
-- [`sceptri/amml-python-base-cuda`](https://hub.docker.com/r/sceptri/amml-python-base-cuda) - default image for servers and/or workstations with NVIDIA GPUs
-- [`sceptri/amml-python-base-cpu-slim`](https://hub.docker.com/r/sceptri/amml-python-base-cpu-slim) - lightweight version of the CPU image for local development, in general use only if appropriate for projects not following the AMML standards/best practices
-- [`sceptri/amml-python-base-cuda-slim`](https://hub.docker.com/r/sceptri/amml-python-base-cuda-slim) - lightweight version of the NVIDIA GPU image, in general use only if appropriate for projects not following the AMML standards/best practices
+- [`devidealab/amml-python-base-cpu`](https://hub.docker.com/r/devidealab/amml-python-base-cpu) - default image to use for local development
+- [`devidealab/amml-python-base-cuda`](https://hub.docker.com/r/devidealab/amml-python-base-cuda) - default image for servers and/or workstations with NVIDIA GPUs
+- [`devidealab/amml-python-base-cpu-slim`](https://hub.docker.com/r/devidealab/amml-python-base-cpu-slim) - lightweight version of the CPU image for local development, in general use only if appropriate for projects not following the AMML standards/best practices
+- [`devidealab/amml-python-base-cuda-slim`](https://hub.docker.com/r/devidealab/amml-python-base-cuda-slim) - lightweight version of the NVIDIA GPU image, in general use only if appropriate for projects not following the AMML standards/best practices
 
 > [!TIP]
 > If you need a newer version of one of the base images, you might need to "force pull" the image from DockerHub to replace the locally cached version
 > 
 > ```shell
-> docker pull sceptri/amml-python-base-cpu:latest
+> docker pull devidealab/amml-python-base-cpu:latest
 > ```
 > 
 > This also applies when using one of the templates (where the image is import via the `Dockerfile` keyword `FROM`)!

@@ -12,14 +12,29 @@ ARG CUDA_VERSION="13.2"
 
 # Note that we are not specifying PyTorch in base_requirements.txt to follow the official installation instructions as closely as possible.
 
-# To err on the side of caution, I used the devel tag
-# https://stackoverflow.com/questions/56405159/what-is-the-difference-between-devel-and-runtime-tag-for-a-docker-container
-FROM pytorch/pytorch:${PYTORCH_VERSION}-cuda${CUDA_VERSION}-cudnn9-devel AS base-cuda
+# Both hardware variants use the official Python image + official PyTorch wheels (multi-arch: amd64 + arm64).
+# The Debian release is pinned explicitly, because the CUDA toolkit apt repository (see toolkit-cuda) is per Debian release.
+FROM python:${PYTHON_VERSION}-slim-trixie AS base-cuda
 
-# WARNING: Remove PEP 668 restriction (should be safe in containers)
-RUN rm -f /usr/lib/python*/EXTERNALLY-MANAGED
+ARG PYTORCH_VERSION
+ARG CUDA_VERSION
 
-FROM python:${PYTHON_VERSION}-slim AS base-cpu
+# Mirrors what the pytorch/pytorch and nvidia/cuda images set, so the NVIDIA runtime exposes the GPU
+ENV NVIDIA_VISIBLE_DEVICES=all \
+    NVIDIA_DRIVER_CAPABILITIES=compute,utility
+
+USER root
+WORKDIR /opt/build
+
+# The CUDA wheels bundle the CUDA runtime/cuDNN/NCCL as nvidia-* pip packages; only the host driver is needed.
+# CUDA_VERSION "13.2" -> wheel index "cu132"
+RUN pip install --upgrade pip \
+    && pip install --no-cache-dir  \
+      "torch==${PYTORCH_VERSION}"  \
+      torchvision  \
+      --index-url "https://download.pytorch.org/whl/cu$(echo ${CUDA_VERSION} | tr -d .)"
+
+FROM python:${PYTHON_VERSION}-slim-trixie AS base-cpu
 
 ARG PYTORCH_VERSION
 ARG PYTHON_VERSION
@@ -64,7 +79,35 @@ RUN git config --system --add safe.directory /opt/project   # writes /etc/gitcon
 COPY --chown=root:root entrypoint.sh .
 ENTRYPOINT ["./entrypoint.sh"]
 
-FROM slim AS full
+FROM slim AS toolkit-cpu
+
+# CUDA compiler + headers for building CUDA extensions (torch.utils.cpp_extension, flash-attn, ...).
+# Runtime libraries already come with the PyTorch wheels; this only adds what compiling needs.
+FROM slim AS toolkit-cuda
+
+ARG CUDA_VERSION
+ARG TARGETARCH
+
+# NVIDIA calls its arm64 server repo "sbsa"
+RUN if [ "${TARGETARCH}" = "arm64" ]; then REPO_ARCH=sbsa; else REPO_ARCH=x86_64; fi \
+    && apt-get update && apt-get install -y --no-install-recommends wget \
+    && wget -q https://developer.download.nvidia.com/compute/cuda/repos/debian13/${REPO_ARCH}/cuda-keyring_1.1-1_all.deb \
+    && dpkg -i cuda-keyring_1.1-1_all.deb && rm cuda-keyring_1.1-1_all.deb \
+    && CUDA_PKG=$(echo ${CUDA_VERSION} | tr . -) \
+    && apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+      cuda-minimal-build-${CUDA_PKG} \
+      libcublas-dev-${CUDA_PKG} \
+      libcusparse-dev-${CUDA_PKG} \
+      libcusolver-dev-${CUDA_PKG} \
+      libcurand-dev-${CUDA_PKG} \
+      ninja-build \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV CUDA_HOME=/usr/local/cuda-${CUDA_VERSION}
+ENV PATH=${CUDA_HOME}/bin:${PATH}
+
+FROM toolkit-${hardware} AS full
 
 COPY --chown=root:root full_requirements.txt .
 RUN pip install --no-cache-dir -r full_requirements.txt

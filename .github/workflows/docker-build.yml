@@ -39,7 +39,9 @@ jobs:
             exit 1
           fi
           echo "All secrets are properly configured"
-  build-and-push:
+  # Each platform is built natively on its own runner and pushed by digest only,
+  # the `merge` job below then combines the digests into one multi-arch tag.
+  build:
     timeout-minutes: 200
 
     strategy:
@@ -48,8 +50,9 @@ jobs:
         # ROCm version is now officially un-supported
         hardware: ["cpu", "cuda"]
         target: ["slim", "full"]
+        platform: ["linux/amd64", "linux/arm64"]
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ (matrix.platform == 'linux/arm64') && 'ubuntu-24.04-arm' || 'ubuntu-latest' }}
     permissions:
       contents: read
       packages: write
@@ -57,6 +60,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Prepare names
+        run: |
+          platform=${{ matrix.platform }}
+          echo "PLATFORM_PAIR=${platform//\//-}" >> "$GITHUB_ENV"
+          echo "PRIMARY_IMAGE=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.hardware }}${{ (matrix.target == 'slim') && '-slim' || '' }}" >> "$GITHUB_ENV"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -107,20 +116,86 @@ jobs:
           large-packages: true
           swap-storage: true
 
-      - name: Build and push Docker image
+      - name: Build and push Docker image (by digest)
+        id: build
         uses: docker/build-push-action@v5
         with:
           context: .
           build-args: |
             hardware=${{ matrix.hardware }}
           target: ${{ matrix.target }}
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          # Only provide the ARM64 build for the CPU version
-          platforms: linux/amd64${{ (matrix.hardware == 'cpu') && ',linux/arm64' || '' }}
+          outputs: type=image,name=${{ env.PRIMARY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
+          # Separate cache per platform, so that amd64 and arm64 do not overwrite each other
+          cache-from: type=gha,scope=${{ matrix.hardware }}-${{ matrix.target }}-${{ env.PLATFORM_PAIR }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.hardware }}-${{ matrix.target }}-${{ env.PLATFORM_PAIR }}
 
-      - name: Image digest
-        run: echo ${{ steps.docker_build.outputs.digest }}
+      - name: Export digest
+        run: |
+          mkdir -p ${{ runner.temp }}/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "${{ runner.temp }}/digests/${digest#sha256:}"
+
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-${{ matrix.hardware }}-${{ matrix.target }}-${{ env.PLATFORM_PAIR }}
+          path: ${{ runner.temp }}/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge:
+    needs: build
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        hardware: ["cpu", "cuda"]
+        target: ["slim", "full"]
+
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: ${{ runner.temp }}/digests
+          pattern: digests-${{ matrix.hardware }}-${{ matrix.target }}-*
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          # The full target is published under both the un-suffixed name and a "-full" suffixed name.
+          # metadata-action ignores empty list entries, so the second line is a no-op for the slim target.
+          images: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.hardware }}${{ (matrix.target == 'slim') && '-slim' || '' }}
+            ${{ (matrix.target == 'full') && format('{0}/{1}-{2}-full', env.REGISTRY, env.IMAGE_NAME, matrix.hardware) || '' }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Create multi-arch manifest and push
+        working-directory: ${{ runner.temp }}/digests
+        env:
+          PRIMARY_IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-${{ matrix.hardware }}${{ (matrix.target == 'slim') && '-slim' || '' }}
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf "${PRIMARY_IMAGE}@sha256:%s " *)
+
+      - name: Inspect image
+        run: docker buildx imagetools inspect ${{ fromJSON(steps.meta.outputs.json).tags[0] }}

@@ -7,6 +7,8 @@ services:
         hardware: cpu
       target: full
     image: amml-python-base-cpu:latest
+    # Docker defaults to 64 MB, which is too small for DataLoader workers and Ray
+    shm_size: "16gb"
     stdin_open: true
     tty: true
     command: bash
@@ -16,6 +18,8 @@ services:
         hardware: cpu
       target: slim
     image: amml-python-base-cpu-slim:latest
+    # Docker defaults to 64 MB, which is too small for DataLoader workers and Ray
+    shm_size: "16gb"
     stdin_open: true
     tty: true
     command: bash
@@ -33,6 +37,8 @@ services:
               count: all
               capabilities:
                 - gpu
+    # Docker defaults to 64 MB, which is too small for DataLoader workers and Ray
+    shm_size: "16gb"
     stdin_open: true
     tty: true
     image: amml-python-base-cuda:latest
@@ -50,6 +56,8 @@ services:
               count: all
               capabilities:
                 - gpu
+    # Docker defaults to 64 MB, which is too small for DataLoader workers and Ray
+    shm_size: "16gb"
     stdin_open: true
     tty: true
     image: amml-python-base-cuda-slim:latest

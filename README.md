@@ -15,10 +15,10 @@ Below are documented main use-cases and their respective recommended workflows:
 - "One needs to try out something very simple in Python without the need for version control or installing additional packages, but they want to use a controlled reproducible environment." - Use the DockerHub built version of the images from this repo directly via `docker run`, e.g.,
   
   ```shell
-  docker run -it -v $(pwd):/opt/build/src devidealab/amml-python-base-cpu-slim:latest bash
+  docker run -it --shm-size=16g -v $(pwd):/opt/build/src devidealab/amml-python-base-cpu-slim:latest bash
   ```
   
-  Here, the `-v $(pwd):/opt/build/src` is optional and mounts your current working directory into `/src` of the base directory.
+  Here, the `-v $(pwd):/opt/build/src` is optional and mounts your current working directory into `/src` of the base directory. The `--shm-size=16g` raises Docker's default of 64 MB shared memory, which is too small for PyTorch `DataLoader` workers and Ray.
 
 - "One works on a (simple) Python project which is not based around machine learning or requires a very specific structure of the project." - Use the simple [AMML Python template](https://github.com/IDeaLab-uni-graz/amml-python-template), which provides `docker-compose.yaml` to ease with the running/building of the project-specific Docker image, e.g.[^1],
   
@@ -36,7 +36,9 @@ Below are documented main use-cases and their respective recommended workflows:
 
 ## Images
 
-We provide several images centered around Python, and more specifically, PyTorch. For AMD64 architecture we supply both the CPU and CUDA versions of Pytorch, whereas only the CPU version is provided for ARM64 architecture.
+We provide several images centered around Python, and more specifically, PyTorch. All images are multi-arch (AMD64 and ARM64), so the CUDA images also run on ARM64 machines with NVIDIA GPUs, e.g., NVIDIA DGX Spark.
+
+All images are built from the official `python:<version>-slim` image with the official PyTorch wheels. For the CUDA images, the CUDA runtime libraries (cuDNN, cuBLAS, NCCL, ...) come bundled with the PyTorch wheels, so only the NVIDIA driver is needed on the host. The *full* CUDA image additionally contains the CUDA compiler `nvcc` and headers (`CUDA_HOME` is set) for compiling CUDA extensions, whereas the *slim* CUDA image contains no compiler.
 
 > Let us note that ROCm support was deprecated, and is currently archived in the `rocm-support` branch.
 
@@ -61,6 +63,17 @@ If you have any suggestion what to include/exclude from the Python module requir
 > ```
 > 
 > This also applies when using one of the templates (where the image is import via the `Dockerfile` keyword `FROM`)!
+
+### NVIDIA DGX Spark Notes
+
+- Use the CUDA images as usual, e.g.,
+
+  ```shell
+  docker run -it --gpus all --shm-size=16g devidealab/amml-python-base-cuda:latest bash
+  ```
+
+- The GPU shares its memory with the CPU (unified memory), so `nvidia-smi` reports GPU memory as "Not Supported". GPU memory panels in, e.g., MLflow system metrics, PyTorch Lightning's `DeviceStatsMonitor` or Ray stay empty; use `torch.cuda.mem_get_info()` instead.
+- When compiling CUDA extensions without a GPU visible (e.g., during `docker build`), set `TORCH_CUDA_ARCH_LIST="12.1"` for DGX Spark. With a GPU visible, the architecture is detected automatically.
 
 ## Development
 

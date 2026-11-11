@@ -1,7 +1,7 @@
 # INFO: Dependabot requires relative paths
 -r slim_requirements.txt
 ipython==9.18.1
-jupyterlab==4.6.5
+jupyterlab==4.6.6
 pillow==13.0.0
 pytorch-lightning==2.6.6
 optuna==5.0.0

@@ -12,3 +12,12 @@ updates:
   allow:
     # Allow both direct and indirect updates for all packages
       - dependency-type: "all"
+  groups:
+    # All weekly version bumps in one PR (and hence one image build)
+    python-packages:
+      applies-to: version-updates
+      patterns: ["*"]
+    # Security fixes are grouped separately, so they are not held back by a broken version bump
+    python-security:
+      applies-to: security-updates
+      patterns: ["*"]

@@ -85,6 +85,24 @@ For ease-of-use, we also include a _docker compose_ file to ease the building an
 docker-compose run --build --rm amml-python-base-cpu
 ```
 
+### Dependabot Updates
+
+Dependabot checks the Python requirements weekly and groups all version bumps into a single PR (and security fixes into another one), so that merging them triggers only one image build. See `.github/dependabot.yaml`.
+
+If one of the bumped packages breaks the build, exclude it from the grouped PR by commenting on the PR, e.g.,
+
+```
+@dependabot ignore ray major version
+```
+
+Dependabot then recreates the PR without that update. Instead of `major version`, one can also use `minor version` or `patch version`, or leave it out entirely (`@dependabot ignore ray`) to ignore all updates of the package. Use `@dependabot unignore ray` to revert this later. For a permanent exclusion that is visible in the repository, add an `ignore` entry to `.github/dependabot.yaml` instead, e.g.,
+
+```yaml
+  ignore:
+    - dependency-name: "ray"
+      update-types: ["version-update:semver-major"]
+```
+
 ### Build Cache in CI
 
 The GitHub workflow stores the Docker build cache in the separate DockerHub repository [`devidealab/amml-python-base-buildcache`](https://hub.docker.com/r/devidealab/amml-python-base-buildcache) instead of the GitHub Actions cache. The GitHub Actions cache is limited to 10 GB per repository, which the CUDA layers (PyTorch wheels with the bundled CUDA libraries, CUDA toolkit) for both architectures easily exceed, so the cache entries would keep evicting each other.

@@ -49,7 +49,9 @@ RUN pip install --upgrade pip \
       torchvision  \
       --index-url https://download.pytorch.org/whl/cpu
 
-FROM base-${hardware} AS slim
+# Everything shared by slim and full that does not depend on the requirements files.
+# full is NOT built on top of slim, so that a slim_requirements.txt bump does not invalidate the (large) CUDA toolkit layer.
+FROM base-${hardware} AS common
 LABEL authors="sceptri"
 
 ARG PYTORCH_VERSION
@@ -69,21 +71,23 @@ RUN apt-get update && \
 
 WORKDIR /opt/build
 
-COPY --chown=root:root slim_requirements.txt .
-RUN pip install --upgrade pip \
-    && pip install --no-cache-dir -r slim_requirements.txt
-
 RUN git config --system --add safe.directory /opt/project   # writes /etc/gitconfig
 
 # Entrypoint improves QoL when passing mulitple commands etc.
 COPY --chown=root:root entrypoint.sh .
 ENTRYPOINT ["./entrypoint.sh"]
 
-FROM slim AS toolkit-cpu
+FROM common AS slim
+
+COPY --chown=root:root slim_requirements.txt .
+RUN pip install --upgrade pip \
+    && pip install --no-cache-dir -r slim_requirements.txt
+
+FROM common AS toolkit-cpu
 
 # CUDA compiler + headers for building CUDA extensions (torch.utils.cpp_extension, flash-attn, ...).
 # Runtime libraries already come with the PyTorch wheels; this only adds what compiling needs.
-FROM slim AS toolkit-cuda
+FROM common AS toolkit-cuda
 
 ARG CUDA_VERSION
 ARG TARGETARCH
@@ -109,9 +113,7 @@ ENV PATH=${CUDA_HOME}/bin:${PATH}
 
 FROM toolkit-${hardware} AS full
 
-COPY --chown=root:root full_requirements.txt .
-RUN pip install --no-cache-dir -r full_requirements.txt
-
-# Entrypoint improves QoL when passing mulitple commands etc.
-COPY --chown=root:root entrypoint.sh .
-ENTRYPOINT ["./entrypoint.sh"]
+# full_requirements.txt includes slim_requirements.txt via "-r", so both files are needed
+COPY --chown=root:root slim_requirements.txt full_requirements.txt ./
+RUN pip install --upgrade pip \
+    && pip install --no-cache-dir -r full_requirements.txt

@@ -85,6 +85,14 @@ For ease-of-use, we also include a _docker compose_ file to ease the building an
 docker-compose run --build --rm amml-python-base-cpu
 ```
 
+### Build Cache in CI
+
+The GitHub workflow stores the Docker build cache in the separate DockerHub repository [`devidealab/amml-python-base-buildcache`](https://hub.docker.com/r/devidealab/amml-python-base-buildcache) instead of the GitHub Actions cache. The GitHub Actions cache is limited to 10 GB per repository, which the CUDA layers (PyTorch wheels with the bundled CUDA libraries, CUDA toolkit) for both architectures easily exceed, so the cache entries would keep evicting each other.
+
+Each build job (hardware × target × platform) uses its own cache tag, e.g., `cuda-full-linux-arm64`, and the *full* builds additionally read the *slim* cache of the same hardware and platform. The cache repository is not meant to be pulled from, and it can be safely deleted at any time; the next workflow run then simply rebuilds everything from scratch.
+
+> Note that the `DOCKERHUB_TOKEN` needs read/write access to the cache repository as well.
+
 ### Testing the GitHub Workflow Locally
 
 I had some success with [`act`](https://nektosact.com/) to simulate GitHub workflow, as typically ran on the GitHub runners, locally. 
